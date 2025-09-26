@@ -1,4 +1,4 @@
-name: Deploy ServiceNow App
+name: Deploy ServiceNow App with Pipeline Steps
 
 on:
   push:
@@ -16,6 +16,20 @@ jobs:
       BRANCH_NAME: ${{ github.ref_name }}
 
     steps:
+      - name: Create Pipeline Steps (if API available)
+        run: |
+          curl -X POST "$SN_INSTANCE/api/sn_cicd/pipeline/environments" \
+            --user "$SN_USERNAME:$SN_PASSWORD" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "pipeline_name": "NameOfYourPipeline",
+              "environments": [
+                { "name": "Dev", "order": 1 },
+                { "name": "Test", "order": 2 },
+                { "name": "Prod", "order": 3 }
+              ]
+            }' || echo "Environment creation step (if exists) failed or skipped"
+
       - name: Apply Remote Changes
         run: |
           curl -X POST "$SN_INSTANCE/api/sn_cicd/apply_changes" \
@@ -28,7 +42,7 @@ jobs:
 
       - name: Publish Application
         run: |
-          curl -X POST "$SN_INSTANCE/api/sn_cicd/publish" \
+          curl -X POST "$SN_INSTANCE/api/sn_cicd/pu blish" \
             --user "$SN_USERNAME:$SN_PASSWORD" \
             --header "Content-Type: application/json" \
             --data '{
