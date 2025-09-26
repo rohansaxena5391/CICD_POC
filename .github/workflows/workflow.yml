@@ -1,4 +1,4 @@
-name: Deploy App to ServiceNow
+name: Deploy ServiceNow App
 
 on:
   push:
@@ -6,49 +6,40 @@ on:
       - main
 
 jobs:
-  deploy_app:
+  deploy:
     runs-on: ubuntu-latest
     env:
-      # Try both: with https and without, see which resolves
-      NOW_SOURCE_INSTANCE: https://dev300372.service-now.com
-      # Or: NOW_SOURCE_INSTANCE: dev300372.service-now.com
-      NOW_USERNAME: ${{ secrets.SN_USERNAME }}
-      NOW_PASSWORD: ${{ secrets.SN_PASSWORD }}
+      SN_INSTANCE: ${{ secrets.SN_INSTANCE_URL }}
+      SN_USERNAME: ${{ secrets.SN_USERNAME }}
+      SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
       APP_SCOPE: x_1761963_ci_cd_pi
+      BRANCH_NAME: ${{ github.ref_name }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Debug variables
+      - name: Apply Remote Changes
         run: |
-          echo "NOW_SOURCE_INSTANCE = $NOW_SOURCE_INSTANCE"
-          echo "NOW_USERNAME = $NOW_USERNAME"
-          echo "APP_SCOPE = $APP_SCOPE"
+          curl -X POST "$SN_INSTANCE/api/sn_cicd/apply_changes" \
+            --user "$SN_USERNAME:$SN_PASSWORD" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "application_scope": "'"$APP_SCOPE"'",
+              "branch_name": "'"$BRANCH_NAME"'"
+            }'
 
-      - name: Apply Changes
-        uses: ServiceNow/sncicd-apply-changes@2.0.0
-        env:
-          nowUsername: ${{ env.NOW_USERNAME }}
-          nowPassword: ${{ env.NOW_PASSWORD }}
-          nowSourceInstance: ${{ env.NOW_SOURCE_INSTANCE }}
-          appScope: ${{ env.APP_SCOPE }}
+      - name: Publish Application
+        run: |
+          curl -X POST "$SN_INSTANCE/api/sn_cicd/publish" \
+            --user "$SN_USERNAME:$SN_PASSWORD" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "application_scope": "'"$APP_SCOPE"'"
+            }'
 
-      - name: Publish App
-        id: publish_app
-        uses: ServiceNow/sncicd-publish-app@2.0.1
-        with:
-          versionFormat: detect
-        env:
-          nowUsername: ${{ env.NOW_USERNAME }}
-          nowPassword: ${{ env.NOW_PASSWORD }}
-          nowSourceInstance: ${{ env.NOW_SOURCE_INSTANCE }}
-          appScope: ${{ env.APP_SCOPE }}
-
-      - name: Install App
-        uses: ServiceNow/sncicd-install-app@2.0.0
-        env:
-          nowUsername: ${{ env.NOW_USERNAME }}
-          nowPassword: ${{ env.NOW_PASSWORD }}
-          nowInstallInstance: ${{ env.NOW_SOURCE_INSTANCE }}
-          appScope: ${{ env.APP_SCOPE }}
+      - name: Install Application
+        run: |
+          curl -X POST "$SN_INSTANCE/api/sn_cicd/install" \
+            --user "$SN_USERNAME:$SN_PASSWORD" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "application_scope": "'"$APP_SCOPE"'"
+            }'
