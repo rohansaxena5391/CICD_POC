@@ -9,7 +9,9 @@ jobs:
   deploy_app:
     runs-on: ubuntu-latest
     env:
+      # Try both: with https and without, see which resolves
       NOW_SOURCE_INSTANCE: https://dev300372.service-now.com
+      # Or: NOW_SOURCE_INSTANCE: dev300372.service-now.com
       NOW_USERNAME: ${{ secrets.SN_USERNAME }}
       NOW_PASSWORD: ${{ secrets.SN_PASSWORD }}
       APP_SCOPE: x_1761963_ci_cd_pi
@@ -17,6 +19,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Debug variables
+        run: |
+          echo "NOW_SOURCE_INSTANCE = $NOW_SOURCE_INSTANCE"
+          echo "NOW_USERNAME = $NOW_USERNAME"
+          echo "APP_SCOPE = $APP_SCOPE"
 
       - name: Apply Changes
         uses: ServiceNow/sncicd-apply-changes@2.0.0
@@ -44,12 +52,3 @@ jobs:
           nowPassword: ${{ env.NOW_PASSWORD }}
           nowInstallInstance: ${{ env.NOW_SOURCE_INSTANCE }}
           appScope: ${{ env.APP_SCOPE }}
-
-      # If you have a tests-run action, insert here with correct version
-      # - name: Run Tests
-      #   uses: ServiceNow/sncicd-tests-run@<correct-version>
-      #   env:
-      #     nowUsername: ${{ env.NOW_USERNAME }}
-      #     nowPassword: ${{ env.NOW_PASSWORD }}
-      #     nowTestInstance: ${{ env.NOW_SOURCE_INSTANCE }}
-      #     appScope: ${{ env.APP_SCOPE }}
