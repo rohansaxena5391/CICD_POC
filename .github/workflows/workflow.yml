@@ -42,7 +42,7 @@ jobs:
 
       - name: Publish Application
         run: |
-          curl -X POST "$SN_INSTANCE/api/sn_cicd/pu blish" \
+          curl -X POST "$SN_INSTANCE/api/sn_cicd/publish" \
             --user "$SN_USERNAME:$SN_PASSWORD" \
             --header "Content-Type: application/json" \
             --data '{
