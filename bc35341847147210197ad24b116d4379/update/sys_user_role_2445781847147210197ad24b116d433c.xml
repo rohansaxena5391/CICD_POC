@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_user_role">
+    <sys_user_role action="INSERT_OR_UPDATE">
+        <assignable_by/>
+        <can_delegate>true</can_delegate>
+        <description/>
+        <elevated_privilege>false</elevated_privilege>
+        <grantable>true</grantable>
+        <includes_roles/>
+        <name>x_1761963_ci_cd_pi.ci.cd.user</name>
+        <scoped_admin>false</scoped_admin>
+        <suffix>x_1761963_ci_cd_pi.ci.cd.user</suffix>
+        <sys_class_name>sys_user_role</sys_class_name>
+        <sys_created_by>rohan_saxena@hcltech.com</sys_created_by>
+        <sys_created_on>2025-09-26 01:48:00</sys_created_on>
+        <sys_id>2445781847147210197ad24b116d433c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_1761963_ci_cd_pi.ci.cd.user</sys_name>
+        <sys_package display_value="CI/CD Pipeline POC" source="x_1761963_ci_cd_pi">bc35341847147210197ad24b116d4379</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CI/CD Pipeline POC">bc35341847147210197ad24b116d4379</sys_scope>
+        <sys_update_name>sys_user_role_2445781847147210197ad24b116d433c</sys_update_name>
+        <sys_updated_by>rohan_saxena@hcltech.com</sys_updated_by>
+        <sys_updated_on>2025-09-26 01:48:00</sys_updated_on>
+    </sys_user_role>
+</record_update>

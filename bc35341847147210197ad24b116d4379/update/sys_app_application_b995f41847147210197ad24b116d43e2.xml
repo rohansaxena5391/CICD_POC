@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_application">
+    <sys_app_application action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category display_value="">Custom Applications</category>
+        <description>CI/CD Pipeline POC</description>
+        <device_type>browser</device_type>
+        <hint>CI/CD Pipeline POC</hint>
+        <name/>
+        <order/>
+        <roles>x_1761963_ci_cd_pi.ci.cd.user</roles>
+        <sys_class_name>sys_app_application</sys_class_name>
+        <sys_created_by>rohan_saxena@hcltech.com</sys_created_by>
+        <sys_created_on>2025-09-26 01:49:27</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>b995f41847147210197ad24b116d43e2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>CI/CD Pipeline POC</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="CI/CD Pipeline POC" source="x_1761963_ci_cd_pi">bc35341847147210197ad24b116d4379</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CI/CD Pipeline POC">bc35341847147210197ad24b116d4379</sys_scope>
+        <sys_update_name>sys_app_application_b995f41847147210197ad24b116d43e2</sys_update_name>
+        <sys_updated_by>rohan_saxena@hcltech.com</sys_updated_by>
+        <sys_updated_on>2025-09-26 01:49:27</sys_updated_on>
+        <title>CI/CD Pipeline POC</title>
+        <view_name/>
+    </sys_app_application>
+</record_update>
