@@ -9,37 +9,47 @@ jobs:
   deploy_app:
     runs-on: ubuntu-latest
     env:
-      SN_INSTANCE: https://dev306629.service-now.com
-      SN_USERNAME: ${{ secrets.SN_USERNAME }}
-      SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
-      APP_SCOPE: "your_app_scope_here"
+      NOW_SOURCE_INSTANCE: ${{ secrets.SN_INSTANCE_URL }}
+      NOW_USERNAME: ${{ secrets.SN_USERNAME }}
+      NOW_PASSWORD: ${{ secrets.SN_PASSWORD }}
+      APP_SCOPE: x_yourcompany_myapp
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Apply Changes to Dev
-        uses: ServiceNow/sncicd-apply-changes@v3
+      - name: Apply Changes
+        uses: ServiceNow/sncicd-apply-changes@2.0.0
+        env:
+          nowUsername: ${{ env.NOW_USERNAME }}
+          nowPassword: ${{ env.NOW_PASSWORD }}
+          nowSourceInstance: ${{ env.NOW_SOURCE_INSTANCE }}
+          appScope: ${{ env.APP_SCOPE }}
+
+      - name: Publish App
+        id: publish_app
+        uses: ServiceNow/sncicd-publish-app@2.0.1
         with:
-          instance_url: ${{ env.SN_INSTANCE }}
-          username: ${{ env.SN_USERNAME }}
-          password: ${{ env.SN_PASSWORD }}
-          app_scope: ${{ env.APP_SCOPE }}
-          branch_name: ${{ github.ref_name }}
+          versionFormat: detect
+        env:
+          nowUsername: ${{ env.NOW_USERNAME }}
+          nowPassword: ${{ env.NOW_PASSWORD }}
+          nowSourceInstance: ${{ env.NOW_SOURCE_INSTANCE }}
+          appScope: ${{ env.APP_SCOPE }}
 
       - name: Install App
-        uses: ServiceNow/sncicd-install-app@v3
-        with:
-          instance_url: ${{ env.SN_INSTANCE }}
-          username: ${{ env.SN_USERNAME }}
-          password: ${{ env.SN_PASSWORD }}
-          app_scope: ${{ env.APP_SCOPE }}
-          branch_name: ${{ github.ref_name }}
+        uses: ServiceNow/sncicd-install-app@2.0.0
+        env:
+          nowUsername: ${{ env.NOW_USERNAME }}
+          nowPassword: ${{ env.NOW_PASSWORD }}
+          nowInstallInstance: ${{ env.NOW_SOURCE_INSTANCE }}
+          appScope: ${{ env.APP_SCOPE }}
 
-      - name: Run Tests
-        uses: ServiceNow/sncicd-tests-run@v3
-        with:
-          instance_url: ${{ env.SN_INSTANCE }}
-          username: ${{ env.SN_USERNAME }}
-          password: ${{ env.SN_PASSWORD }}
-          app_scope: ${{ env.APP_SCOPE }}
+      # If you have a tests-run action, insert here with correct version
+      # - name: Run Tests
+      #   uses: ServiceNow/sncicd-tests-run@<correct-version>
+      #   env:
+      #     nowUsername: ${{ env.NOW_USERNAME }}
+      #     nowPassword: ${{ env.NOW_PASSWORD }}
+      #     nowTestInstance: ${{ env.NOW_SOURCE_INSTANCE }}
+      #     appScope: ${{ env.APP_SCOPE }}
