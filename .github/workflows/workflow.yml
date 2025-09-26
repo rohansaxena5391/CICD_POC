@@ -23,7 +23,7 @@ jobs:
           now_username: ${{ secrets.SN_USERNAME }}
           now_password: ${{ secrets.SN_PASSWORD }}
           branch_name: ${{ github.ref_name }}    # the branch you’re pushing
-          app_scope: your_app_scope
+          app_scope: x_1761963_ci_cd_pi
 
       # 2. Publish the application
       - name: SN Publish Application
