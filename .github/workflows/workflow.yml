@@ -1,0 +1,59 @@
+name: ServiceNow CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci_cd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 1. Apply remote changes (pull from GitHub into ServiceNow)
+      - name: SN Apply Changes
+        uses: ServiceNow/sncicd-apply-changes@v1
+        with:
+          now_instance: ${{ secrets.SN_INSTANCE_URL }}
+          now_username: ${{ secrets.SN_USERNAME }}
+          now_password: ${{ secrets.SN_PASSWORD }}
+          branch_name: ${{ github.ref_name }}    # the branch you’re pushing
+          app_scope: your_app_scope
+
+      # 2. Publish the application
+      - name: SN Publish Application
+        uses: ServiceNow/sncicd-publish-app@v1
+        with:
+          now_instance: ${{ secrets.SN_INSTANCE_URL }}
+          now_credentials: ${{ secrets.SN_CREDENTIALS }}
+          app_scope: your_app_scope
+          increment_version: true
+
+      # 3. Install the application
+      - name: SN Install Application
+        uses: ServiceNow/sncicd-install-app@v1
+        with:
+          now_instance: ${{ secrets.SN_INSTANCE_URL }}
+          credentials: ${{ secrets.SN_CREDENTIALS }}
+          app_scope: your_app_scope
+
+      # 4. Run ATF tests
+      - name: SN Run Test Suite
+        uses: ServiceNow/sncicd-tests-run@v1
+        with:
+          now_instance: ${{ secrets.SN_INSTANCE_URL }}
+          credentials: ${{ secrets.SN_CREDENTIALS }}
+          test_suite_name: "My Test Suite"
+
+      # 5. Optional: Rollback on failure (use as needed)
+      # - name: SN Rollback Application
+      #   uses: ServiceNow/sncicd-rollback-app@v1
+      #   with:
+      #     now_instance: ${{ secrets.SN_INSTANCE_URL }}
+      #     credentials: ${{ secrets.SN_CREDENTIALS }}
+      #     app_scope: your_app_scope
