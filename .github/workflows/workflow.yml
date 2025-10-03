@@ -38,7 +38,7 @@ jobs:
           appSysID: ${{ secrets.SN_APP_SYSID }}
 
     outputs:
-      publishversion: ${{ steps.publish_app.outputs.newVersion }}
+      publishversion: ${{ steps.publish_app.outputs.publishversion }}
 
   deployprod:
     needs: build
