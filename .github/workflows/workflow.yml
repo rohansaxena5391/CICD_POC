@@ -8,15 +8,13 @@ on:
 
 jobs:
   build:
-    # Purpose of this job is to Apply Remote Changes for the branch triggering 
-    # the pipeline build to the Dev instance, then publish the application to 
-    # app repo using the template versioning format. 
+    # Purpose: Apply Remote Changes on Dev, then Publish the app
     name: Publish from Dev
     runs-on: ubuntu-latest
-    # Below line can be used to set conditionals for modifying your pipeline as needed.
-    # if: ${{ github.event_name == 'pull_request'}}
 
     steps:
+      - name: Enable debug logging
+        run: echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
 
       - name: ServiceNow CI/CD Apply Changes
         uses: ServiceNow/sncicd-apply-changes@2.0.0
@@ -32,46 +30,32 @@ jobs:
         with:
           versionTemplate: 1.1
           versionFormat: template
-          # Optional, add +X to version number. Default: 1 
-          # incrementBy: X
+          # incrementBy: X  # Optional increment
         env:
           nowUsername: ${{ secrets.SN_USERNAME }}
           nowPassword: ${{ secrets.SN_PASSWORD }}
           nowSourceInstance: ${{ secrets.SN_DEV_INSTANCE }}
           appSysID: ${{ secrets.SN_APP_SYSID }}
-          
-    # This is required to pass the version number output from Publish App 
-    # to the input for Install App in the next job! This is because the jobs 
-    # run on different Linux instances, so without this Install App won't know
-    # what to install.
+
     outputs:
-      publishversion: ${{ steps.publish_app.outputs.publishversion }}
+      publishversion: ${{ steps.publish_app.outputs.newVersion }}
 
   deployprod:
-    # Purpose of this job is to Install App to a Prod instance. This should only 
-    # trigger if the feature branch has been merged to master after a successfully 
-    # completed pull request, hence the conditional for push to master. In other words,
-    # the first two jobs run on CI, then all three jobs run on CD. 
     needs: build
     name: Deploy to Prod
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+
     steps:
-    
       - name: ServiceNow CI/CD Install App
         id: install_app_prod
         uses: ServiceNow/sncicd-install-app@2.0.0
         with:
           version: ${{ needs.build.outputs.publishversion }}
-          # Only applicable if Application Customization is active. 
-          # Version of the base application on which to apply the customizations
-#          baseAppVersion: '1.2.3'
-          # Only applicable if Application Customization is active and the associated 
-          # application is a higher version than the currently installed version
-          # Default: false
-#          autoUpgradeBaseApp: true
+          # baseAppVersion: '1.2.3'  # Optional
+          # autoUpgradeBaseApp: true  # Optional
         env:
-          snowUsername: ${{ secrets.SN_USERNAME }}
-          snowPassword: ${{ secrets.SN_PASSWORD }}
-          snowInstallInstance: ${{ secrets.SN_PROD_INSTANCE }}
+          nowUsername: ${{ secrets.SN_USERNAME }}
+          nowPassword: ${{ secrets.SN_PASSWORD }}
+          nowInstallInstance: ${{ secrets.SN_PROD_INSTANCE }}
           appSysID: ${{ secrets.SN_APP_SYSID }}
