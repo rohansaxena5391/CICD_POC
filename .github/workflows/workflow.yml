@@ -1,46 +1,77 @@
-name: Deploy to ServiceNow Environment
+name: ServiceNow GitHub Actions Demo
 
 on:
+  pull_request:
   push:
     branches:
       - POCBranch
-  workflow_dispatch:  # Enables manual execution from the GitHub UI
 
 jobs:
-  deploy:
+  build:
+    # Purpose of this job is to Apply Remote Changes for the branch triggering 
+    # the pipeline build to the Dev instance, then publish the application to 
+    # app repo using the template versioning format. 
+    name: Publish from Dev
     runs-on: ubuntu-latest
+    # Below line can be used to set conditionals for modifying your pipeline as needed.
+    # if: ${{ github.event_name == 'pull_request'}}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Create ServiceNow Change Request
-        id: create_change
-        uses: ServiceNow/servicenow-devops-change@main # Example action, actual action might differ
+      - name: ServiceNow CI/CD Apply Changes
+        uses: ServiceNow/sncicd-apply-changes@2.0.0
+        env:
+          nowUsername: ${{ secrets.SN_USERNAME }}
+          nowPassword: ${{ secrets.SN_PASSWORD }}
+          nowSourceInstance: ${{ secrets.SN_DEV_INSTANCE }}
+          appSysID: ${{ secrets.SN_APP_SYSID }}
+
+      - name: ServiceNow CI/CD Publish App
+        id: publish_app
+        uses: ServiceNow/sncicd-publish-app@2.0.1
         with:
-          instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          username: ${{ secrets.SN_USERNAME }}
-          password: ${{ secrets.SN_PASSWORD }}
-          change-request-data: |
-            {
-              "short_description": "Deployment for ${{ github.sha }}",
-              "description": "Automated deployment triggered by GitHub Actions.",
-              "assignment_group": "Development",
-              "implementation_plan": "Deploy application changes.",
-              "backout_plan": "Rollback to previous version.",
-              "test_plan": "Execute automated tests."
-            }
+          versionTemplate: 1.1
+          versionFormat: template
+          # Optional, add +X to version number. Default: 1 
+          # incrementBy: X
+        env:
+          nowUsername: ${{ secrets.SN_USERNAME }}
+          nowPassword: ${{ secrets.SN_PASSWORD }}
+          nowSourceInstance: ${{ secrets.SN_DEV_INSTANCE }}
+          appSysID: ${{ secrets.SN_APP_SYSID }}
+          
+    # This is required to pass the version number output from Publish App 
+    # to the input for Install App in the next job! This is because the jobs 
+    # run on different Linux instances, so without this Install App won't know
+    # what to install.
+    outputs:
+      publishversion: ${{ steps.publish_app.outputs.newVersion }}
 
-      - name: Perform Deployment Steps
-        run: |
-          echo "Executing deployment script..."
-          # Add your actual deployment commands here
-          # For example: deploy to a server, update configurations, etc.
-
-      - name: Update ServiceNow Deployment Status
-        uses: ServiceNow/servicenow-devops-update-deployment@main # Example action
+  deployprod:
+    # Purpose of this job is to Install App to a Prod instance. This should only 
+    # trigger if the feature branch has been merged to master after a successfully 
+    # completed pull request, hence the conditional for push to master. In other words,
+    # the first two jobs run on CI, then all three jobs run on CD. 
+    needs: build
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    steps:
+    
+      - name: ServiceNow CI/CD Install App
+        id: install_app_prod
+        uses: ServiceNow/sncicd-install-app@2.0.0
         with:
-          instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          username: ${{ secrets.SN_USERNAME }}
-          password: ${{ secrets.SN_PASSWORD }}
-          change-request-sys-id: ${{ steps.create_change.outputs.sys_id }}
-          status: "Deployed"
+          version: ${{ needs.test.outputs.publishversion }}
+          # Only applicable if Application Customization is active. 
+          # Version of the base application on which to apply the customizations
+#          baseAppVersion: '1.2.3'
+          # Only applicable if Application Customization is active and the associated 
+          # application is a higher version than the currently installed version
+          # Default: false
+#          autoUpgradeBaseApp: true
+        env:
+          nowUsername: ${{ secrets.SN_USERNAME }}
+          nowPassword: ${{ secrets.SN_PASSWORD }}
+          nowInstallInstance: ${{ secrets.SN_PROD_INSTANCE }}
+          appSysID: ${{ secrets.SN_APP_SYSID }}
