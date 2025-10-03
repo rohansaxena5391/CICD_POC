@@ -45,7 +45,7 @@ jobs:
     # run on different Linux instances, so without this Install App won't know
     # what to install.
     outputs:
-      publishversion: ${{ steps.publish_app.outputs.newVersion }}
+      publishversion: ${{ steps.publish_app.outputs.publishversion }}
 
   deployprod:
     # Purpose of this job is to Install App to a Prod instance. This should only 
@@ -62,7 +62,7 @@ jobs:
         id: install_app_prod
         uses: ServiceNow/sncicd-install-app@2.0.0
         with:
-          version: ${{ needs.build.outputs.newVersion }}
+          version: ${{ needs.build.outputs.publishversion }}
           # Only applicable if Application Customization is active. 
           # Version of the base application on which to apply the customizations
 #          baseAppVersion: '1.2.3'
