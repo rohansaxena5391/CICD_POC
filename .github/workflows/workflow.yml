@@ -29,7 +29,7 @@ jobs:
         uses: ServiceNow/sncicd-publish-app@2.0.0
         with:
           versionTemplate: 1.1
-          versionFormat: auto
+          versionFormat: template
           # incrementBy: X  # Optional increment
         env:
           nowUsername: ${{ secrets.SN_USERNAME }}
