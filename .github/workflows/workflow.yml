@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - POCBranch
+  workflow_dispatch:  # Enables manual execution from the GitHub UI
 
 jobs:
   deploy:
@@ -13,6 +14,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create ServiceNow Change Request
+        id: create_change
         uses: ServiceNow/servicenow-devops-change@main # Example action, actual action might differ
         with:
           instance-url: ${{ secrets.SN_INSTANCE_URL }}
@@ -27,7 +29,6 @@ jobs:
               "backout_plan": "Rollback to previous version.",
               "test_plan": "Execute automated tests."
             }
-          # Other parameters as required by the ServiceNow action
 
       - name: Perform Deployment Steps
         run: |
@@ -41,6 +42,5 @@ jobs:
           instance-url: ${{ secrets.SN_INSTANCE_URL }}
           username: ${{ secrets.SN_USERNAME }}
           password: ${{ secrets.SN_PASSWORD }}
-          change-request-sys-id: ${{ steps.create_change.outputs.sys_id }} # Assuming previous step outputs the sys_id
+          change-request-sys-id: ${{ steps.create_change.outputs.sys_id }}
           status: "Deployed"
-          # Other parameters as required
