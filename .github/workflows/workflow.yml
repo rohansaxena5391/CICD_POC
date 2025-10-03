@@ -1,10 +1,10 @@
 name: ServiceNow GitHub Actions Demo
 
 on:
-  pull_request:
   push:
     branches:
       - POCBranch
+  workflow_dispatch:  # Enables manual execution from the GitHub UI
 
 jobs:
   build:
@@ -52,7 +52,7 @@ jobs:
     # trigger if the feature branch has been merged to master after a successfully 
     # completed pull request, hence the conditional for push to master. In other words,
     # the first two jobs run on CI, then all three jobs run on CD. 
-    needs: build
+    needs: test
     name: Deploy to Prod
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
