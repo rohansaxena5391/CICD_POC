@@ -23,7 +23,7 @@ jobs:
         env:
           nowUsername: rohan_saxena@hcltech.com
           nowPassword: Nokia@2626
-          nowSourceInstance: ${{ secrets.SN_DEV_INSTANCE }}
+          nowSourceInstance: dev306629.service-now.com
           appSysID: bc35341847147210197ad24b116d4379
 
       - name: ServiceNow CI/CD Publish App
@@ -37,7 +37,7 @@ jobs:
         env:
           nowUsername: rohan_saxena@hcltech.com
           nowPassword: Nokia@2626
-          nowSourceInstance: ${{ secrets.SN_DEV_INSTANCE }}
+          nowSourceInstance: dev306629.service-now.com
           appSysID: bc35341847147210197ad24b116d4379
           
     # This is required to pass the version number output from Publish App 
