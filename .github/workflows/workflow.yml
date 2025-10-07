@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - POCBranch
+      - main
   workflow_dispatch:    
 
 jobs:
